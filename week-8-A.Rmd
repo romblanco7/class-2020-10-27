@@ -30,20 +30,53 @@ Weeks 7, 8 and 9 are the core of the class. We have a question. We have some dat
 
 * `att_chg` as a function of `gender`
 
+```{r}
+gender1 <- stan_glm(data = week_8,
+                    att_chg ~ gender - 1, 
+                    family = gaussian,
+                    refresh = 0)
+## 
+```
+* `att_chg` as a function of `party`
 
-* `att_chg` as a function of `liberal`
-
+```{r}
+stan_glm(data = week_8,
+                    att_chg ~ party - 1, 
+                    family = gaussian,
+                    refresh = 0)
+```
 
 * `att_chg` as a function of `treatment`
-
-
-
+```{r}
+treatment_2 <- stan_glm(data = week_8,
+                    att_chg ~ treatment - 1, 
+                    family = gaussian,
+                    refresh = 0)
+# If you look at the trains data, you will see that that those under control are more liberal compared to those under treatment
+```
 
 
 ## Scene 2
 
 **Prompt:** For the model with `att_chg` as a function of `treatment`, create posterior probability densities for the two important parameters. Write a paragraph interpreting the meaning of those posteriors. 
 
+```{r}
+treatment_2 %>%
+  as_tibble() %>%
+  
+  ggplot(aes(x= treatmentTreated)) +
+  geom_density(aes(y = after_stat(count/sum(count))),color = "blue") +
+  geom_density(aes(x = treatmentControl, y = after_stat(count/sum(count)), color = "red")) +
+  labs(title = "Posterior Probablity Distribution",
+       subtitle = "Average change in attitude towards immigration",
+       y = "Probability",
+       x = "Scale") +
+  theme_classic() 
+  
+
+# There is greater shift in the probability of attitude change for those under treated condition
+
+```
 
 
 
@@ -52,4 +85,19 @@ Weeks 7, 8 and 9 are the core of the class. We have a question. We have some dat
 **Prompt:** Create a plot of the the posterior for the average treatment effect. Write a paragraph interpreting the plot.
 
 
+```{r}
+treatment_2 %>%
+as_tibble() %>% 
+  mutate(ate = treatmentTreated - treatmentControl) %>% 
+  ggplot(aes(x = ate)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   bins = 100) +
+    labs(title = "Posterior Probability Distribution for ATE",
+         subtitle = "Average change in attitude towards immigration",
+         x = "Difference in Attitude",
+         y = "Probability") +
+    theme_classic()
+
+# Represents change in ATE in the treatment group minus the ATE in the control group. This posterior distribution represents probability of receiving varying ATEs 
+```
 
